@@ -2,26 +2,25 @@ import { PrismaClient } from "../generated/prisma";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  await prisma.characters.createMany({
-    data: [
+async function seedDatabase() {
+  try {
+    const characters = [
       {
-        firstName: "Hiroshi",
-        lastName: "Agasa",
-        role: "	Professor who creates gadgets for Conan to use. Is the best friend and the next-door neighbour of the Kudos. He was the first to know about Conan's true identity.",
+        firstName: "Eri",
+        lastName: "Kisaki",
+        role: "Ran's mother, a very successful attorney. Married to, but currently living separately from Kogoro Mouri. She is a friend of Yukiko Kudo.",
       },
-      {
-        firstName: "Sonoko",
-        lastName: "Suzuki",
-        role: "Ran's best friend. The youngest daughter of the wealthy Suzuki family.",
-      },
-    ],
-  });
+    ];
+
+    await prisma.characters.createMany({ data: characters });
+
+    console.log("✅ Seeding completed successfully!");
+  } catch (error) {
+    console.error("❌ Seeding failed:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-main()
-  .then(() => console.log("Seeding completed"))
-  .catch((error) => console.error(error))
-  .finally(() => {
-    prisma.$disconnect();
-  });
+// Run the seeding function
+seedDatabase();
