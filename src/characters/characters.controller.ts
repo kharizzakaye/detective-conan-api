@@ -16,7 +16,7 @@ import {
   ApiQuery,
   ApiBody,
 } from "@nestjs/swagger";
-import { Prisma } from "generated/prisma";
+import { Prisma } from "@prisma/client";
 
 @ApiTags("Characters")
 @Controller("characters")
@@ -62,8 +62,15 @@ export class CharactersController {
   findAll(
     @Query("firstName") firstName?: string,
     @Query("lastName") lastName?: string,
+    @Query("page") page: number = 1,
+    @Query("pageSize") pageSize: number = 10,
   ) {
-    return this.charactersService.findAll(firstName, lastName);
+    return this.charactersService.findAll(
+      firstName,
+      lastName,
+      Number(page),
+      Number(pageSize),
+    );
   }
 
   @Get(":id")

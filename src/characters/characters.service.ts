@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "generated/prisma";
+import { Prisma } from "@prisma/client";
 import { DatabaseService } from "src/database/database.service";
 
 @Injectable()
@@ -12,13 +12,42 @@ export class CharactersService {
     });
   }
 
-  async findAll(firstName?: string, lastName?: string) {
-    return this.databaseService.characters.findMany({
-      where: {
-        ...(firstName && { firstName }),
-        ...(lastName && { lastName }),
-      },
-    });
+  async findAll(
+    firstName?: string,
+    lastName?: string,
+    page = 1,
+    pageSize = 10,
+  ) {
+    try {
+      const skip = (page - 1) * pageSize;
+      const take = pageSize;
+
+      const characters = await this.databaseService.characters.findMany({
+        where: {
+          ...(firstName && { firstName }),
+          ...(lastName && { lastName }),
+        },
+        skip,
+        take,
+      });
+
+      const totalCount = await this.databaseService.characters.count({
+        where: {
+          ...(firstName && { firstName }),
+          ...(lastName && { lastName }),
+        },
+      });
+
+      return {
+        data: characters,
+        totalCount,
+        totalPages: Math.ceil(totalCount / pageSize),
+        currentPage: page,
+      };
+    } catch (error) {
+      console.error("❌ Error fetching characters:", error);
+      throw new Error("Failed to retrieve character list.");
+    }
   }
 
   async findOne(id: number) {
